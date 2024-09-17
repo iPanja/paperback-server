@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"paperback-server/internal/api"
-	"paperback-server/internal/db"
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,7 +33,6 @@ func main() {
 	// Device endpoints
 
 	// TESTING
-	e.GET("/test", db.DBTest)
 	e.POST("/test_token", api.TestToken)
 
 	e.Logger.Fatal(e.Start(":1323"))

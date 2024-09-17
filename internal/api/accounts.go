@@ -9,8 +9,8 @@ import (
 )
 
 type Account struct {
-	ID       primitive.ObjectID `bson:"_id"`
-	Username string             `bson:"username"`
+	ID       primitive.ObjectID `bson:"_id" json:"id"`
+	Username string             `bson:"username" json:"username"`
 }
 
 func Login(c echo.Context) error {
@@ -43,13 +43,13 @@ func TestToken(c echo.Context) error {
 	//   400: errorResponse
 	//   500: errorResponse
 	fmt.Println("received test token request")
-	token := c.Request().Header.Get("Authorization")
-	fmt.Printf("token: %s\n", token)
+	raw_auth := c.Request().Header.Get("Authorization")
+	fmt.Printf("Authorization: <%s>\n", raw_auth)
 
-	username, err := ValidateToken(token)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("error: %s", err))
+	account, ok := isAuthorized(raw_auth)
+	if !ok {
+		return c.String(http.StatusForbidden, "error: not authorized")
 	}
 
-	return c.String(http.StatusOK, fmt.Sprintf("{\"username\": \"%s\"}", username))
+	return c.String(http.StatusOK, fmt.Sprintf("{\"account\": \"%s\"}", account))
 }
