@@ -14,10 +14,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwt_key = []byte("mysecret321")
+// go::embed jwt.key
+var jwt_key []byte
 
 const TokenDuration = 1 // in hours
-type token string
 
 type my_jwt struct {
 	jwt.RegisteredClaims
