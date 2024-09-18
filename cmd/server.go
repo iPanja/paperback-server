@@ -18,6 +18,7 @@ func main() {
 	})
 
 	// Account endpoints
+	e.GET("/account", api.ViewAccount, api.EnforceLogin)
 
 	// Authentication endpoints
 	e.POST("/login", api.Login)

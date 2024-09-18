@@ -64,3 +64,7 @@ func TestToken(c echo.Context) error {
 
 	return c.String(http.StatusOK, fmt.Sprintf("{\"account\": \"%s\"}", account))
 }
+
+func ViewAccount(c echo.Context) error {
+	return c.String(http.StatusOK, "View account, you are authenticated!")
+}

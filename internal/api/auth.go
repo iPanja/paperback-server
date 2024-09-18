@@ -161,3 +161,15 @@ func HashPassword(c echo.Context) error {
 
 	return c.String(http.StatusOK, fmt.Sprintf("{\"hash\": \"%s\"}", hash))
 }
+
+// Middlweware to check the token
+func EnforceLogin(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		raw_auth := c.Request().Header.Get("Authorization")
+		if _, ok := IsAuthorized(raw_auth); !ok {
+			return c.String(http.StatusForbidden, "error: not authorized")
+		}
+
+		return next(c)
+	}
+}
