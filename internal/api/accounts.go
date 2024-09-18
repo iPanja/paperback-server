@@ -66,5 +66,6 @@ func TestToken(c echo.Context) error {
 }
 
 func ViewAccount(c echo.Context) error {
-	return c.String(http.StatusOK, "View account, you are authenticated!")
+	acc := c.Get("account").(Account)
+	return c.String(http.StatusOK, fmt.Sprintf("View account, %s. You are authenticated!", acc.Username))
 }

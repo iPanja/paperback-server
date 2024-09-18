@@ -166,10 +166,12 @@ func HashPassword(c echo.Context) error {
 func EnforceLogin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		raw_auth := c.Request().Header.Get("Authorization")
-		if _, ok := IsAuthorized(raw_auth); !ok {
+		acc, ok := IsAuthorized(raw_auth)
+		if !ok {
 			return c.String(http.StatusForbidden, "error: not authorized")
 		}
 
+		c.Set("account", acc)
 		return next(c)
 	}
 }
