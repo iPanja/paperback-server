@@ -1,10 +1,13 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"paperback-server/internal/db"
 
 	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -13,24 +16,32 @@ type Account struct {
 	Username string             `bson:"username" json:"username"`
 }
 
-func Login(c echo.Context) error {
-	// Login to the server
+func FetchAccount(username string) (Account, bool) {
+	// Fetch the account from the database
 	//
-	// Login to the server.
+	// Fetch the account from the database.
 	//
 	// Responses:
-	//   200: loginResponse
+	//   200: accountResponse
 	//   400: errorResponse
 	//   500: errorResponse
-	fmt.Println("received login request")
-	username, password := c.FormValue("username"), c.FormValue("password")
 
-	token, err := LoginRequest(username, password)
+	// Get client instance
+	client, err := db.GetClient()
 	if err != nil {
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("error: %s", err))
+		return Account{}, false
+	}
+	defer client.Disconnect(context.TODO())
+
+	// Fetch the account
+	var account Account
+	filter := bson.D{{Key: "username", Value: username}}
+	err = client.Database("paperback").Collection("accounts").FindOne(context.TODO(), filter).Decode(&account)
+	if err != nil {
+		return Account{}, false
 	}
 
-	return c.String(http.StatusOK, fmt.Sprintf("{\"token\": \"%s\"}", token))
+	return account, true
 }
 
 func TestToken(c echo.Context) error {
@@ -46,7 +57,7 @@ func TestToken(c echo.Context) error {
 	raw_auth := c.Request().Header.Get("Authorization")
 	fmt.Printf("Authorization: <%s>\n", raw_auth)
 
-	account, ok := isAuthorized(raw_auth)
+	account, ok := IsAuthorized(raw_auth)
 	if !ok {
 		return c.String(http.StatusForbidden, "error: not authorized")
 	}

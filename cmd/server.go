@@ -18,7 +18,10 @@ func main() {
 	})
 
 	// Account endpoints
+
+	// Authentication endpoints
 	e.POST("/login", api.Login)
+	e.POST("/hash", api.HashPassword)
 
 	// Book endpoints
 
