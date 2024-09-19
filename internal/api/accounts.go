@@ -1,48 +1,13 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"paperback-server/internal/db"
+	"paperback-server/internal/models"
 
 	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-type Account struct {
-	ID       primitive.ObjectID `bson:"_id" json:"id"`
-	Username string             `bson:"username" json:"username"`
-}
-
-func FetchAccount(username string) (Account, bool) {
-	// Fetch the account from the database
-	//
-	// Fetch the account from the database.
-	//
-	// Responses:
-	//   200: accountResponse
-	//   400: errorResponse
-	//   500: errorResponse
-
-	// Get client instance
-	client, err := db.GetClient()
-	if err != nil {
-		return Account{}, false
-	}
-	defer client.Disconnect(context.TODO())
-
-	// Fetch the account
-	var account Account
-	filter := bson.D{{Key: "username", Value: username}}
-	err = client.Database("paperback").Collection("accounts").FindOne(context.TODO(), filter).Decode(&account)
-	if err != nil {
-		return Account{}, false
-	}
-
-	return account, true
-}
 
 func TestToken(c echo.Context) error {
 	// Test the token
@@ -66,6 +31,16 @@ func TestToken(c echo.Context) error {
 }
 
 func ViewAccount(c echo.Context) error {
-	acc := c.Get("account").(Account)
+	acc := c.Get("account").(models.Account)
 	return c.String(http.StatusOK, fmt.Sprintf("View account, %s. You are authenticated!", acc.Username))
+}
+
+func ViewAccountByUsername(c echo.Context) error {
+	username := c.Param("username")
+	ac := models.AccountClient{Client: &db.Client{Context: c}}
+	if account, ok := ac.FetchAccountByUsername(username); !ok {
+		return c.String(http.StatusNotFound, "Account not found")
+	} else {
+		return c.String(http.StatusOK, fmt.Sprintf("View account, %s.\n%+v", account.Username, account))
+	}
 }

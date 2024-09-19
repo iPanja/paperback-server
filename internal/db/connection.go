@@ -3,14 +3,19 @@ package db
 import (
 	"context"
 
+	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const connection_string = "mongodb://localhost:27017/"
 
+type Client struct {
+	Context echo.Context
+}
+
 // Create a new client and connect to the server
-func GetClient() (*mongo.Client, error) {
+func getClient() (*mongo.Client, error) {
 	// Use the SetServerAPIOptions() method to set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(connection_string).SetServerAPIOptions(serverAPI)
@@ -21,4 +26,14 @@ func GetClient() (*mongo.Client, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+func (c Client) GetClient() *mongo.Client {
+	client, err := getClient()
+	if err != nil && c.Context != nil {
+		c.Context.Logger().Error(err)
+		c.Context.String(500, "error: failed to connect to the database")
+	}
+
+	return client
 }

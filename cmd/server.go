@@ -19,10 +19,11 @@ func main() {
 
 	// Account endpoints
 	e.GET("/account", api.ViewAccount, api.EnforceLogin)
+	e.GET("/account/:username", api.ViewAccountByUsername)
 
 	// Authentication endpoints
 	e.POST("/login", api.Login)
-	e.POST("/hash", api.HashPassword)
+	e.POST("/hash", api.TestHashPassword)
 
 	// Book endpoints
 
