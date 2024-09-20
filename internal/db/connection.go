@@ -10,6 +10,9 @@ import (
 
 const connection_string = "mongodb://localhost:27017/"
 
+// This type exists to bundle an HTTP context alongside any database call
+// The only way to access a database client/cursor is through this struct
+// While you technically can create a nil context, it is not advised
 type Client struct {
 	Context echo.Context
 }
@@ -26,6 +29,10 @@ func getClient() (*mongo.Client, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+func (c Client) Logger() echo.Logger {
+	return c.Logger()
 }
 
 func (c Client) GetClient() *mongo.Client {

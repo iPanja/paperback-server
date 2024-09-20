@@ -26,9 +26,9 @@ func main() {
 	e.GET("/account/:username", api.ViewAccountByUsername)
 
 	// Authentication endpoints
-	e.POST("/login", api.Login)
+	e.POST("/auth/login", api.Login)
 	e.POST("/hash", api.TestHashPassword)
-	e.POST("/refresh", api.RefreshTokens)
+	e.POST("/auth/refresh", api.RefreshTokens)
 
 	// Book endpoints
 

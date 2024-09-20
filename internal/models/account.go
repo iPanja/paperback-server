@@ -52,15 +52,16 @@ func CheckPassword(hash string, plaintext string) bool {
 	return true
 }
 
-func (c AccountClient) StoreRefreshToken(account Account, refresh_token string) {
+func (c AccountClient) StoreRefreshToken(account Account, refreshToken string) {
 	client := c.GetClient()
 	defer client.Disconnect(context.TODO())
 
 	// Delete the old refresh token
-	client.Database("paperback").Collection("refresh_tokens").DeleteOne(context.TODO(), bson.D{{Key: "account_id", Value: account.ID}})
+	//client.Database("paperback").Collection("refresh_tokens").DeleteOne(context.TODO(), bson.D{{Key: "account_id", Value: account.ID}})
+	DeleteOne(c, "refresh_tokens", bson.D{{Key: "account_id", Value: account.ID}})
 	// Store the refresh token
-	doc := bson.M{"account_id": account.ID, "refresh_token": refresh_token}
-	client.Database("paperback").Collection("refresh_tokens").InsertOne(context.TODO(), doc)
+	doc := bson.M{"account_id": account.ID, "refresh_token": refreshToken}
+	InsertOne(c, "refresh_tokens", doc)
 }
 
 func (c AccountClient) FetchRefreshToken(account Account) (string, bool) {
