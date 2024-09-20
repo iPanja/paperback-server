@@ -43,11 +43,38 @@ func (a *Account) HashPassword(plaintext string) (string, error) {
 }
 
 func CheckPassword(hash string, plaintext string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(hash))
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(plaintext))
 	if err != nil {
 		fmt.Println("Failed to compare passwords ", err)
 		return false
 	}
 
 	return true
+}
+
+func (c AccountClient) StoreRefreshToken(account Account, refresh_token string) {
+	client := c.GetClient()
+	defer client.Disconnect(context.TODO())
+
+	// Delete the old refresh token
+	client.Database("paperback").Collection("refresh_tokens").DeleteOne(context.TODO(), bson.D{{Key: "account_id", Value: account.ID}})
+	// Store the refresh token
+	doc := bson.M{"account_id": account.ID, "refresh_token": refresh_token}
+	client.Database("paperback").Collection("refresh_tokens").InsertOne(context.TODO(), doc)
+}
+
+func (c AccountClient) FetchRefreshToken(account Account) (string, bool) {
+	client := c.GetClient()
+	defer client.Disconnect(context.TODO())
+
+	// Fetch the refresh token
+	var doc bson.M
+	filter := bson.D{{Key: "account_id", Value: account.ID}}
+	err := client.Database("paperback").Collection("refresh_tokens").FindOne(context.TODO(), filter).Decode(&doc)
+
+	if refreshToken, ok := doc["refresh_token"]; !ok || err != nil {
+		return "", false
+	} else {
+		return refreshToken.(string), true
+	}
 }

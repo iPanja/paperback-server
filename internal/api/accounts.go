@@ -19,10 +19,10 @@ func TestToken(c echo.Context) error {
 	//   400: errorResponse
 	//   500: errorResponse
 	fmt.Println("received test token request")
-	raw_auth := c.Request().Header.Get("Authorization")
-	fmt.Printf("Authorization: <%s>\n", raw_auth)
+	rawAuth := c.Request().Header.Get("Authorization")
+	fmt.Printf("Authorization: <%s>\n", rawAuth)
 
-	account, ok := IsAuthorized(raw_auth)
+	account, ok := IsAuthorized(rawAuth, "") // allow any type of token
 	if !ok {
 		return c.String(http.StatusForbidden, "error: not authorized")
 	}
@@ -32,6 +32,7 @@ func TestToken(c echo.Context) error {
 
 func ViewAccount(c echo.Context) error {
 	acc := c.Get("account").(models.Account)
+	fmt.Println("acc: ", acc)
 	return c.String(http.StatusOK, fmt.Sprintf("View account, %s. You are authenticated!", acc.Username))
 }
 
