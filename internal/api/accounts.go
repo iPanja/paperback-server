@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"paperback-server/internal/db"
 	"paperback-server/internal/models"
+	"paperback-server/internal/service"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,11 +20,13 @@ func TestToken(c echo.Context) error {
 	//   400: errorResponse
 	//   500: errorResponse
 	fmt.Println("received test token request")
-	rawAuth := c.Request().Header.Get("Authorization")
-	fmt.Printf("Authorization: <%s>\n", rawAuth)
-
-	account, ok := IsAuthorized(rawAuth, "") // allow any type of token
+	refreshToken, ok := service.ExtractToken(c.Request())
 	if !ok {
+		return c.String(BadRequest())
+	}
+
+	account, _, err := service.ValidateToken(refreshToken)
+	if err != nil {
 		return c.String(http.StatusForbidden, "error: not authorized")
 	}
 
